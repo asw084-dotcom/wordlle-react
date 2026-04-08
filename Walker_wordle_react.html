@@ -1,0 +1,236 @@
+<html>
+<head>
+<title>Ash's Wordle with React</title>
+<script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<style type="text/css">
+body {
+    text-align: center;
+    font-family: Arial, Helvetica, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #121213;
+    color: #fff;
+}
+h1 {
+    font-size: 2.5vw;
+    letter-spacing: 4px;
+    margin-top: 5px;
+    margin-bottom: 0;
+}
+#board {
+    margin: 5px auto;
+    display: inline-block;
+}
+.row {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+    margin-bottom: 5px;
+}
+.tile {
+    width: 58px;
+    height: 58px;
+    border: 2px solid #3a3a3c;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.8rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+.green {
+    background-color: #538d4e;
+    border-color: #538d4e;
+}
+.yellow {
+    background-color: #b59f3b;
+    border-color: #b59f3b;
+}
+.grey {
+    background-color: #3a3a3c;
+    border-color: #3a3a3c;
+}
+#keyboard {
+    margin: 20px auto;
+    max-width: 500px;
+}
+.kbrow {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    margin-bottom: 4px;
+}
+.key {
+    width: 34px;
+    height: 44px;
+    border-radius: 4px;
+    background-color: #818384;
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.key.green {
+    background-color: #538d4e;
+}
+.key.yellow {
+    background-color: #b59f3b;
+}
+.key.grey {
+    background-color: #3a3a3c;
+}
+@media (max-width: 700px) {
+    h1 {
+        font-size: 5vw;
+    }
+    .tile {
+        width: 46px;
+        height: 46px;
+        font-size: 1.3rem;
+    }
+}
+</style>
+</head>
+<body>
+
+<h1>Play Wordle!</h1>
+<div id="myapp"></div>
+
+<script>
+
+// variables
+var NUM_ROWS = 6
+var NUM_COLS = 5
+var answer = "MOODY"
+var guesses = ["MIGHT", "FLOOD", "STRAY"]
+
+
+// check each letter and color 
+var allResults = []
+
+for (g=0; g<guesses.length; g++)
+{
+    guessArr = guesses[g].split("")
+    answerArr = answer.split("")
+    results = ["grey", "grey", "grey", "grey", "grey"]
+    used = [false, false, false, false, false]
+
+// check for green 
+    for (i=0; i<NUM_COLS; i++)
+    {
+        if (guessArr[i] == answerArr[i])
+        {
+            results[i] = "green"
+            used[i] = true
+        }
+    }
+// check for yellow and skip greens
+    for (i=0; i<NUM_COLS; i++)
+    {
+        if (results[i] == "green")
+            continue
+
+        for (j=0; j<NUM_COLS; j++)
+        {
+            if (used[j] == false && guessArr[i] == answerArr[j])
+            {
+                results[i] = "yellow"
+                used[j] = true
+                break
+            }
+        }
+    }
+
+    allResults.push(results)
+}
+// keyboard colors
+var keyColors = {}
+
+for (g=0; g<guesses.length; g++)
+{
+    for (i=0; i<NUM_COLS; i++)
+    {
+        letter = guesses[g].charAt(i)
+        color = allResults[g][i]
+
+        // dont change green to anything else
+        if (keyColors[letter] == "green")
+            continue
+        // dont change yellow to grey
+        if (keyColors[letter] == "yellow" && color == "grey")
+            continue
+
+        keyColors[letter] = color
+    }
+}
+// react
+var boardRows = []
+
+for (r=0; r<NUM_ROWS; r++)
+{
+    var tiles = []
+    for (c=0; c<NUM_COLS; c++)
+    {
+        if (r < guesses.length)
+        {
+            letter = guesses[r].charAt(c)
+            color = allResults[r][c]
+            tiles.push(
+                React.createElement("div", {className: "tile " + color, key: c}, letter)
+            )
+        }
+        else
+        {
+            tiles.push(
+                React.createElement("div", {className: "tile", key: c}, "")
+            )
+        }
+    }
+    boardRows.push(
+        React.createElement("div", {className: "row", key: r}, tiles)
+    )
+}
+
+var board = React.createElement("div", {id: "board"}, boardRows)
+
+// keyboard 
+row1 = "QWERTYUIOP"
+row2 = "ASDFGHJKL"
+row3 = "ZXCVBNM"
+rows = [row1, row2, row3]
+
+var kbRows = []
+
+for (r=0; r<rows.length; r++)
+{
+    letters = rows[r].split("")
+    var keys = letters.map(function(letter, c) {
+        keyClass = "key"
+        if (keyColors[letter] == "green")
+            keyClass = "key green"
+        else if (keyColors[letter] == "yellow")
+            keyClass = "key yellow"
+        else if (keyColors[letter] == "grey")
+            keyClass = "key grey"
+        return React.createElement("div", {className: keyClass, key: c}, letter)
+    })
+    kbRows.push(
+        React.createElement("div", {className: "kbrow", key: r}, keys)
+    )
+}
+
+var keyboard = React.createElement("div", {id: "keyboard"}, kbRows)
+
+
+var app = React.createElement("div", null, board, keyboard)
+
+var myroot = ReactDOM.createRoot(document.querySelector("#myapp"))
+myroot.render(app)
+
+</script>
+
+</body>
+</html>
