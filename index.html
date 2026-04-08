@@ -18,6 +18,12 @@ h1 {
     margin-top: 5px;
     margin-bottom: 0;
 }
+#message {
+    font-size: 1.2rem;
+    font-weight: bold;
+    height: 30px;
+    margin: 5px auto;
+}
 #board {
     margin: 5px auto;
     display: inline-block;
@@ -95,29 +101,30 @@ h1 {
 </style>
 </head>
 <body>
-
+ 
 <h1>Play Wordle!</h1>
+<div id="message">&nbsp;</div>
 <div id="myapp"></div>
-
+ 
 <script>
-
+ 
 // variables
 var NUM_ROWS = 6
 var NUM_COLS = 5
 var answer = "MOODY"
 var guesses = ["MIGHT", "FLOOD", "STRAY"]
-
-
+ 
+ 
 // check each letter and color 
 var allResults = []
-
+ 
 for (g=0; g<guesses.length; g++)
 {
     guessArr = guesses[g].split("")
     answerArr = answer.split("")
     results = ["grey", "grey", "grey", "grey", "grey"]
     used = [false, false, false, false, false]
-
+ 
 // check for green 
     for (i=0; i<NUM_COLS; i++)
     {
@@ -132,7 +139,7 @@ for (g=0; g<guesses.length; g++)
     {
         if (results[i] == "green")
             continue
-
+ 
         for (j=0; j<NUM_COLS; j++)
         {
             if (used[j] == false && guessArr[i] == answerArr[j])
@@ -143,32 +150,32 @@ for (g=0; g<guesses.length; g++)
             }
         }
     }
-
+ 
     allResults.push(results)
 }
 // keyboard colors
 var keyColors = {}
-
+ 
 for (g=0; g<guesses.length; g++)
 {
     for (i=0; i<NUM_COLS; i++)
     {
         letter = guesses[g].charAt(i)
         color = allResults[g][i]
-
+ 
         // dont change green to anything else
         if (keyColors[letter] == "green")
             continue
         // dont change yellow to grey
         if (keyColors[letter] == "yellow" && color == "grey")
             continue
-
+ 
         keyColors[letter] = color
     }
 }
 // react
 var boardRows = []
-
+ 
 for (r=0; r<NUM_ROWS; r++)
 {
     var tiles = []
@@ -193,17 +200,17 @@ for (r=0; r<NUM_ROWS; r++)
         React.createElement("div", {className: "row", key: r}, tiles)
     )
 }
-
+ 
 var board = React.createElement("div", {id: "board"}, boardRows)
-
+ 
 // keyboard 
 row1 = "QWERTYUIOP"
 row2 = "ASDFGHJKL"
 row3 = "ZXCVBNM"
 rows = [row1, row2, row3]
-
+ 
 var kbRows = []
-
+ 
 for (r=0; r<rows.length; r++)
 {
     letters = rows[r].split("")
@@ -221,16 +228,16 @@ for (r=0; r<rows.length; r++)
         React.createElement("div", {className: "kbrow", key: r}, keys)
     )
 }
-
+ 
 var keyboard = React.createElement("div", {id: "keyboard"}, kbRows)
-
-
+ 
+ 
 var app = React.createElement("div", null, board, keyboard)
-
+ 
 var myroot = ReactDOM.createRoot(document.querySelector("#myapp"))
 myroot.render(app)
-
+ 
 </script>
-
+ 
 </body>
 </html>
